@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <title>aa</title>
+        <meta charset="UTF-8">
+        <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    .ct {
+    
+      /* margin: 0 auto; */
+    }
+
+    .ct > ul {
+      list-style: none;
+      position: relative;
+      margin: 0 auto;
+      max-width: 1032px;
+    }
+
+    .ct>ul>li.item {
+      position: absolute;
+      width: 200px;
+      margin: 10px;
+      padding: 18px;
+      border: 1px solid #e4e4e4;
+      /* transition: all .3s; */
+    }
+
+    .ct>ul>li.item>a>img {
+      width: 100%;
+    }
+
+    .ct>ul>li.item>h3 {
+      padding: 15px 0;
+      font-size: 16px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .ct>ul>li.item>p {
+      padding: 15px 0 0 0;
+      color: rgb(151, 150, 150);
+    }
+
+    .loadMore {
+      width: 10px;
+      height: 10px;
+      margin-top: 10px;
+      visibility: hidden;
+    }
+
+    .hide {
+      visibility: hidden;
+    }
+        </style>
+    </head>
+    <body>
+    <div class="wrap">
+        <div class="ct">
+            <ul id="pic-ct">
+                <!-- <li class="item">
+              <a href="http://slide.tech.sina.com.cn/d/slide_5_453_102333.html/d/2">
+                <img src="http://n.sinaimg.cn/tech/transform/20171023/NizV-fymzqse2852255.jpg" alt="">
+              </a>
+              <h3>南非狮子把公路当自己家 当街交配致交通堵塞</h3>
+              <p>一只雄狮和一只母狮把公路当自己家，悠悠然躺在路中央睡觉，导致过往的车辆无法通行,这两货睡醒之后居然开始交配，光天化日之下当着路人的面公然“啪啪啪”。</p>
+            </li>-->
+                <li class="item hide"></li>
+            </ul>
+    
+            <p class="loadMore">我是看不到的</p>
+        </div>
+    </div>
+
+       <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script>
+            var colNum = parseInt($('#pic-ct').width() / $('.item').outerWidth(true));
+            var colSumHeight = [];
+            var curPage = 1;
+            var perPageCount = 10;
+            var nodeWidth = $('.item').outerWidth(true);
+            for (var i = 0; i < colNum; i++) {
+                colSumHeight[i] = 0
+            }
+            // console.log(colSumHeight)
+            
+            start()
+            function start() {
+                getData(function (newsList) {
+                    console.log(newsList)
+                    $.each(newsList, function (idx, news) {
+                        var $node = getNode(news)
+                        $node.find('img').load(function () {
+                            $('#pic-ct').append($node)
+                            // console.log($node,'load...')
+                            waterFallPlace($node)
+                        })
+                    })
+                })
+            }
+            var clock 
+            $(window).scroll(function () {
+                if(clock !==undefined){
+                    clearTimeout(clock)
+                }
+                clock = setTimeout(function () {
+                    if (isVisible($('.loadMore'))) {
+                        start()
+                    }
+                }, 300);
+              
+            })
+
+   
+
+            function isVisible($el) {
+               var scrollH = $(Window).scrollTop(),
+                   winH = $(window).height(),
+                   top = $el.offset().top
+                   console.log(top)
+
+                   if (top < winH + scrollH +200) {
+                       return true
+                   }else{
+                       return false
+                   }
+            }
+
+           
+            
+            function getData(callBack){
+                $.ajax({
+                    url: 'http://platform.sina.com.cn/slide/album_tech?jsoncallback=func&app_key=1271687855&num=3&page=4',
+                    dataType: 'jsonp',
+                    jsonp: 'jsoncallback',
+                    data:{
+                        app_key:'1271687855',
+                        num: perPageCount,
+                        page: curPage
+                    }
+                }).done(function(ret){
+                    if (ret && ret.status && ret.status.code === '0') {
+                        callBack(ret.data)
+                        curPage++                        
+                    }else{
+                        console.log('get error data')
+                    }
+                })
+            }
+
+            function getNode(item) {
+                    var html = ''
+                    html += '<li class="item">'
+                    html += '<a href="' + item.url + '"><img src="' + item.img_url + '" alt=""></a>'
+                    html += '<h3>' + item.name + '</h3>'
+                    html += '<p>' + item.short_intro + '</p>'
+                    html + '</li>';
+                    return $(html)//返回此节点
+                }
+            
+
+
+            function waterFallPlace($node) {
+                    var idx = 0,
+                        minSumHeight = colSumHeight[0];
+                    
+                    for(var i = 0;i<colSumHeight.length;i++){
+                        if(colSumHeight[i] < minSumHeight){
+                            idx = i;
+                            minSumHeight = colSumHeight[i];
+                        }
+                    } 
+                    // var minValue = Math.min.apply(null, itemArr)
+                    // var minIndex = itemArr.indexOf(minValue)
+                    $node.css({
+                        top: minSumHeight,
+                        left: nodeWidth * idx,
+                        opacity: 1
+                    });
+
+                    colSumHeight[idx] += $node.outerHeight(true)
+                    $('#pic-ct').height(Math.max.apply(null,colSumHeight));
+            }
+
+
+        </script>
+    </body>
+</html>

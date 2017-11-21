@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <title>aa</title>
+        <meta charset="UTF-8">
+        <style>
+            .img-preview {
+                height: 1400px;
+                background: rgb(255, 179, 179);
+                color: white;
+                text-align: center;
+                vertical-align: middle;
+                font-size: 40px;
+                font-weight: 700;
+            }
+            .img-preview::before{
+                content: '';
+                display: inline-block;
+                height: 60%;
+                vertical-align: middle;
+            }
+            .totop {
+                cursor: pointer;
+                position: fixed;
+                right: 40px;
+                bottom: 40px;
+                background-color: #444;
+                color: white;
+                height: 60px;
+                width: 60px;
+                border-radius: 30px;
+                line-height: 60px;
+                text-align: center;
+                display: none;
+            }
+        </style>
+    </head>
+   
+    <body>
+        <div class="img-preview">
+            滑动！
+            向下
+        </div>
+        <div class="totop">
+            返回
+        </div>
+
+
+        <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script>
+            function scrollTop($node) {
+                this.$ct = $('body')
+                this.target = $node
+                this.bindEvent()
+            }
+            scrollTop.prototype = {
+                bindEvent: function(){
+                    var _this = this
+                    var isCreate = false
+                    $(window).scroll(function () {
+                        if($(window).scrollTop() > 100 && !isCreate ){
+                            isCreate = true
+                            _this.createNode()
+                        }else if($(window).scrollTop() <= 100 && isCreate ) {
+                            isCreate = false
+                            _this.target.fadeOut(300)
+                        }
+                    })
+                },
+
+                createNode: function(){
+                    this.target = $('<div class="totop">返回</div>')
+                    this.target.css({
+                       cursor: 'pointer',
+                        position: 'fixed',
+                        right: '40px',
+                        bottom: '40px',
+                        backgroundColor: '#444',
+                        color: 'white',
+                        height: '60px',
+                        width: '60px',
+                        borderRadius: '30px',
+                        lineHeight: '60px',
+                        textAlign: 'center',
+                        display: 'none'
+                    })
+                    this.$ct.append(this.target)
+                    this.target.fadeIn(300)
+                    this.bindNode(this.target)
+                },
+                bindNode :function($noded){
+                    $noded.click(function () {
+                        //    $(window).scrollTop(0)
+                        var timer
+                        cancelAnimationFrame(timer);
+                        timer = requestAnimationFrame(function fn() {
+                            var oTop = $(window).scrollTop()
+                            if (oTop > 0) {
+                                $(window).scrollTop(oTop - 50)
+                                timer = requestAnimationFrame(fn);
+                                console.log(2)
+                            } else {
+                                cancelAnimationFrame(timer);
+                            }
+                        })
+                    })
+                }
+            }
+            // var scrollTops = new scrollTop($('.toptop'))
+     
+
+                
+
+        </script>
+    </body>
+</html>
+
